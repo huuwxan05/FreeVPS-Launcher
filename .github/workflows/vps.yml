@@ -38,22 +38,15 @@ jobs:
             nodejs \
             npm
 
-      - name: Prepare VPS workspace
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Prepare workspace
         run: |
           mkdir -p "$HOME/vps-data"
           mkdir -p "$HOME/tools"
-          echo "Workspace ready"
 
-      - name: Network information
-        run: |
-          echo "=== NETWORK ==="
-          echo "Public IP:"
-          curl -4 -s https://api.ipify.org
-          echo
-          echo "Hostname:"
-          hostname
-
-      - name: VPS ready
+      - name: VPS information
         run: |
           echo "================================"
           echo " Temporary Linux environment READY"
@@ -62,11 +55,11 @@ jobs:
           echo "Home: $HOME"
           echo "CPU: $(nproc)"
           echo "IP: $(curl -4 -s https://api.ipify.org)"
+          echo "Node: $(node --version)"
+          echo "Python: $(python3 --version)"
           echo "================================"
 
-      - name: Keep session alive
-        run: |
-          while true; do
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] VPS alive"
-            sleep 60
-          done
+      - name: Start secure temporary SSH
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
