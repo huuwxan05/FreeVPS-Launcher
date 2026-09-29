@@ -3,34 +3,24 @@ name: Temporary VPS
 on:
   workflow_dispatch:
 
-jobs:
+permissions:
+  contents: read
 
+jobs:
   vps:
-    name: Temporary Linux VPS
     runs-on: ubuntu-latest
-    timeout-minutes: 330
+    timeout-minutes: 300
 
     steps:
-
       - name: System information
         run: |
-          echo "================================="
-          echo "Temporary VPS started"
-          echo "================================="
-
-          echo "Hostname:"
-          hostname
-
-          echo "Kernel:"
+          echo "=== SYSTEM ==="
           uname -a
-
-          echo "CPU:"
+          echo "=== CPU ==="
           nproc
-
-          echo "Memory:"
+          echo "=== MEMORY ==="
           free -h
-
-          echo "Disk:"
+          echo "=== DISK ==="
           df -h
 
       - name: Install tools
@@ -48,41 +38,35 @@ jobs:
             nodejs \
             npm
 
-      - name: Prepare environment
+      - name: Prepare VPS workspace
         run: |
           mkdir -p "$HOME/vps-data"
+          mkdir -p "$HOME/tools"
+          echo "Workspace ready"
 
-          cat > "$HOME/vps-data/README.txt" <<'EOF'
-Temporary GitHub Actions VPS
-
-This environment is temporary.
-Data should not be considered persistent.
-EOF
-
-      - name: VPS information
+      - name: Network information
         run: |
+          echo "=== NETWORK ==="
+          echo "Public IP:"
+          curl -4 -s https://api.ipify.org
           echo
-          echo "========== VPS INFO =========="
-          echo "User:"
-          whoami
+          echo "Hostname:"
+          hostname
 
-          echo
-          echo "Home:"
-          echo "$HOME"
-
-          echo
-          echo "IP:"
-          curl -4 -s https://api.ipify.org || true
-
-          echo
-          echo
+      - name: VPS ready
+        run: |
+          echo "================================"
+          echo " Temporary Linux environment READY"
+          echo "================================"
+          echo "User: $(whoami)"
+          echo "Home: $HOME"
+          echo "CPU: $(nproc)"
+          echo "IP: $(curl -4 -s https://api.ipify.org)"
+          echo "================================"
 
       - name: Keep session alive
         run: |
-          echo "VPS đang hoạt động."
-
           while true; do
-            echo "[$(date)] VPS alive"
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] VPS alive"
             sleep 60
           done
-
